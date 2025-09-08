@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
 class Article extends Model
@@ -20,13 +21,10 @@ class Article extends Model
         'content',
         'description',
         'url',
-        'url_to_image',
+        'image_url',
         'source_name',
         'source_id',
-        'author',
         'category',
-        'country',
-        'language',
         'published_at',
     ];
 
@@ -39,43 +37,54 @@ class Article extends Model
         'published_at' => 'datetime',
     ];
 
-    /**
-     * Scope to filter articles by source.
-     */
-    public function scopeBySource($query, $source)
+
+    public function scopeBySource(Builder $query, $source)
     {
         return $query->where('source_name', $source);
     }
 
-    /**
-     * Scope to filter articles by category.
-     */
-    public function scopeByCategory($query, $category)
+    public function scopeByCategory(Builder $query, $category)
     {
         return $query->where('category', $category);
     }
 
-    /**
-     * Scope to filter articles by date range.
-     */
-    public function scopeByDateRange($query, $from = null, $to = null)
+
+    public function scopeByDateRange(Builder $query, $from = null, $to = null)
     {
         if ($from) {
-            $query->where('published_at', '>=', Carbon::parse($from));
+            $query->where('published_at', '>=', Carbon::parse($from)->startOfDay());
         }
-        
+
         if ($to) {
-            $query->where('published_at', '<=', Carbon::parse($to));
+            $query->where('published_at', '<=', Carbon::parse($to)->endOfDay());
         }
 
         return $query;
     }
 
-    /**
-     * Scope to order articles by publication date (newest first).
-     */
-    public function scopeLatest($query)
+
+    public function scopeLatestByPublished(Builder $query)
     {
         return $query->orderBy('published_at', 'desc');
+    }
+
+    public function scopeAvailableSources(Builder $query)
+    {
+        return $query->select('source_name')
+                     ->distinct()
+                     ->orderBy('source_name');
+    }
+
+    public function scopeAvailableCategories(Builder $query)
+    {
+        return $query->select('category')
+                     ->whereNotNull('category')
+                     ->distinct()
+                     ->orderBy('category');
+    }
+
+    public function scopeUrl(Builder $query, $url)
+    {
+        return $query->where('url', $url);
     }
 }

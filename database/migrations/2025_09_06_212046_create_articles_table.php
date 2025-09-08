@@ -17,16 +17,13 @@ return new class extends Migration
             $table->text('content')->nullable();
             $table->text('description')->nullable();
             $table->string('url')->unique();
-            $table->string('url_to_image')->nullable();
+            $table->string('image_url')->nullable();
             $table->string('source_name');
             $table->string('source_id')->nullable();
-            $table->string('author')->nullable();
             $table->string('category')->nullable();
-            $table->string('country')->nullable();
-            $table->string('language')->default('en');
             $table->timestamp('published_at');
             $table->timestamps();
-            
+
             // Add indexes for better query performance
             $table->index(['source_name', 'published_at']);
             $table->index(['category', 'published_at']);
